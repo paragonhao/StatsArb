@@ -14,3 +14,5 @@ alphablend = X_blend ./ std(X_blend, 0, 2, 'omitnan');
 alphablend(alphablend > 3) = 3;
 alphablend(alphablend < -3) = -3;
 
+
+alphablend(isnan(alphablend)) = 0;

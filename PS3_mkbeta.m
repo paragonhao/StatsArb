@@ -1,6 +1,6 @@
 
 % ewmktportfolio
-ewmarket_portfolio = mean(tri, 2, 'omitnan');
+ewmarket_portfolio = mean(retMat, 2, 'omitnan');
 
 
 % part 2 risk model 
@@ -9,11 +9,7 @@ mon = month(y);
 lagmon = lagmatrix(mon,1);
 firstday = mon - lagmon;
 index = find(firstday == 1 | firstday == -11 | isnan(firstday));
-
-startIdx = index(13);
 yrInterval = 12;
-shrink = zeros(60,1);
-shrinkIdx = 1;
 
 totalret = [zeros(1,n);retMat];
 mktbeta = [];

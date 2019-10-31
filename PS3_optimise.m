@@ -1,5 +1,5 @@
-mu  = 8;
-lambda = 1;
+mu  = 50000000;
+lambda = 15000000;
 T = size(tri,1);
 n = size(tri,2);
 w = zeros(n, 1); % initial position
@@ -16,6 +16,8 @@ tcost(isnan(tcost)) = 0;
 options = optimset('Algorithm', 'interior-point-convex');
 options = optimset(options, 'Display', 'iter');
 t0 = 246; % start trading on 2nd Jan 1998
+
+
 
 for i = t0: (T-1)
    idx = find(isactivenow(i, :)==1);
@@ -59,29 +61,3 @@ for i = t0: (T-1)
         sum(trade(i+1, :) .* tcost(i+1, :), 'omitnan');
    
 end 
-% 
-% theta = min(volume(245,:) * 0.01, 150000);
-% pie = min(10 * theta, 0.025 * 50000000);
-% gamma = max(w - theta, - pie);
-% delta = min(w + theta, pie);
-% 
-% r_star = 300000;
-% 
-% 
-% 
-% A = [transpose(rho) -transpose(rho); -transpose(rho)  transpose(rho)]
-% b = [(r_star - transpose(rho) * w); (r_star + transpose(rho) * w)];
-% u =
-% H = 2 * mu * shrink()
-% 
-% 
-% lambda = 15
-% mu = 100 
-% 
-% 
-% 
-% LB = zeros(2 * n,1);
-% 
-% 
-% 
-% [u,fval, exitflag, output] = quadprog(H,g,A,b,C,d,LB,UB,[],options)
