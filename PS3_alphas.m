@@ -10,6 +10,21 @@ for i=1:566
     rho(i,idx) =1;
 end
 
+ctry=[];
+for i=1:566
+    ind = find(cellfun('isempty',{allstocks(i).indexlist.index})==0);
+    ctry=[ctry;allstocks(i).indexlist(ind(1)).index];    
+end
+ctryList = unique(cellstr(ctry));
+phi = zeros(566,11);
+
+for i=1:566
+    idx = find(isactivenow(i, :)==1);
+    ind = find(cellfun('isempty',{allstocks(i).indexlist.index})==0); 
+    [~,idx]=ismember(cellstr(allstocks(i).indexlist(ind(1)).index),ctryList);
+    phi(i,idx) =1;
+end
+
 
 % Alpha 1: find arithmetic return
 tri_T = size(tri,1);

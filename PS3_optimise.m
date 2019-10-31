@@ -1,5 +1,5 @@
-mu  = 8;
-lambda = 1;
+mu  = 1;
+lambda = 0.01;
 T = size(tri,1);
 n = size(tri,2);
 w = zeros(n, 1); % initial position
@@ -7,7 +7,7 @@ trade = zeros(T, n); % trade
 back_weight = zeros(T, n); % backtest position
 daily_pnl = zeros(T, 1); % p&l for every day
 r_star = 300000;
-
+f_star = 100000;
 dates = datetime(myday,'InputFormat','dd-MMM-yyyy');
 
 tcost(isnan(tcost)) = 0;
@@ -34,25 +34,28 @@ for i = t0: (T-1)
    g = [2 * mu * hat_sigma * w(idx) - alphablend(i, idx)' + lambda * tcost(i, idx)'; ...
        -2 * mu * hat_sigma * w(idx) + alphablend(i, idx)' + lambda * tcost(i, idx)'];
    
-   A = [rho(idx, :)' -rho(idx, :)'; -rho(idx, :)' rho(idx, :)'];
+   A = [rho(idx, :)' -rho(idx, :)'; -rho(idx, :)' rho(idx, :)';phi(idx, :)' -phi(idx, :)'; -phi(idx, :)' phi(idx, :)';];
    
-   b = [r_star * ones(40,1) - rho(idx, :)' * w(idx); r_star*ones(40,1) + rho(idx, :)' * w(idx)];
+   b = [r_star * ones(40,1) - rho(idx, :)' * w(idx); r_star*ones(40,1) + rho(idx, :)' * w(idx);...
+       f_star * ones(11,1) - phi(idx, :)' * w(idx); f_star*ones(11,1) + phi(idx, :)' * w(idx);];
 
    C = [mktbeta(shrink_order,idx) -mktbeta(shrink_order,idx)];
-   d = mktbeta(shrink_order,idx) * w(idx);
+   d = -mktbeta(shrink_order,idx) * w(idx);
    
    LB = zeros(2 * length(idx),1);
-   theta = volume(i,idx) * 0.01;
+   theta = min(volume(i,idx) * 0.01 * 1000, 150000);
    pie = min(10 * theta, 0.025 * 50000000);
    UB = [max(0, min(theta', pie' - w(idx))); max(0, min(theta', pie' + w(idx)))];
    
    [u, fval, exitflag, output] = quadprog(H, g, A, b, C, d, LB, UB, [], options);
-   
    y = u(1:length(idx));
    z = u(length(idx)+1:end); 
    
    yy = zeros(n,1);
    zz = zeros(n,1);
+   
+   yy(idx) = y;
+   zz(idx) = z;
    
    trade(i+1, :) = (yy-zz);
    
@@ -61,3 +64,6 @@ for i = t0: (T-1)
    daily_pnl(i+1) = sum(back_weight(i+1, :) .* retMat(i+1, :), 'omitnan') - ...
         sum(trade(i+1, :) .* tcost(i+1, :), 'omitnan');   
 end 
+
+booksize = sum(abs(back_weight), 2, 'omitnan');
+tradesize = sum(abs(trade), 2, 'omitnan');
