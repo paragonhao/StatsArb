@@ -11,7 +11,6 @@ for i=1:566
 end
 
 
-
 % find arithmetic return
 tri_T = size(tri,1);
 retMat = tri(2:tri_T,:)./tri(1:(tri_T-1),:) - 1;
