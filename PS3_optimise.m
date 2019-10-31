@@ -1,5 +1,5 @@
-mu  = 50000000;
-lambda = 15000000;
+mu  = 8;
+lambda = 1;
 T = size(tri,1);
 n = size(tri,2);
 w = zeros(n, 1); % initial position
@@ -16,7 +16,8 @@ tcost(isnan(tcost)) = 0;
 options = optimset('Algorithm', 'interior-point-convex');
 options = optimset(options, 'Display', 'iter');
 t0 = 246; % start trading on 2nd Jan 1998
-
+retMat = [zeros(1,n);retMat];
+retMat(isnan(retMat)) = 0;
 
 
 for i = t0: (T-1)
@@ -41,7 +42,7 @@ for i = t0: (T-1)
    d = mktbeta(shrink_order,idx) * w(idx);
    
    LB = zeros(2 * length(idx),1);
-   theta = min(volume(i,idx) * 0.01, 150000);
+   theta = volume(i,idx) * 0.01;
    pie = min(10 * theta, 0.025 * 50000000);
    UB = [max(0, min(theta', pie' - w(idx))); max(0, min(theta', pie' + w(idx)))];
    
@@ -58,6 +59,5 @@ for i = t0: (T-1)
    w = w .* (1 + fillmissing(retMat(i, :), 'constant', 0)') + trade(i+1,: )';
    back_weight(i+1, :) = w';
    daily_pnl(i+1) = sum(back_weight(i+1, :) .* retMat(i+1, :), 'omitnan') - ...
-        sum(trade(i+1, :) .* tcost(i+1, :), 'omitnan');
-   
+        sum(trade(i+1, :) .* tcost(i+1, :), 'omitnan');   
 end 
