@@ -1,5 +1,5 @@
 mu  = 1;
-lambda = 0.01;
+lambda = 0.1;
 T = size(tri,1);
 n = size(tri,2);
 w = zeros(n, 1); % initial position
@@ -61,9 +61,31 @@ for i = t0: (T-1)
    
    w = w .* (1 + fillmissing(retMat(i, :), 'constant', 0)') + trade(i+1,: )';
    back_weight(i+1, :) = w';
-   daily_pnl(i+1) = sum(back_weight(i+1, :) .* retMat(i+1, :), 'omitnan') - ...
-        sum(trade(i+1, :) .* tcost(i+1, :), 'omitnan');   
+   daily_pnl(i+1) = sum(back_weight(i+1, :) .* retMat(i+1, :), 'omitnan') - sum(trade(i+1, :) .* tcost(i+1, :), 'omitnan');   
 end 
 
-booksize = sum(abs(back_weight), 2, 'omitnan');
-tradesize = sum(abs(trade), 2, 'omitnan');
+pnl = cumsum(daily_pnl*100);
+booksize = sum(abs(back_weight), 2, 'omitnan') * 100;
+tradesize = sum(abs(trade), 2, 'omitnan') * 100;
+excess_return = daily_pnl ./ booksize;
+sharpe = mean(excess_return, 'omitnan') * sqrt(252)/std(excess_return, 'omitnan');
+
+% max drawdown
+dd = zeros(T,1);
+ddt = zeros(T,1);
+hwm_old = 0;
+for i = 257:T
+    hwm = max(pnl(1:i));
+    if hwm > hwm_old
+        hwm_old = hwm;
+    else 
+        ddt(i) = ddt(i-1)+1;
+    end
+    dd(i) = hwm-pnl(i);
+end
+deepest_dd = max(dd);
+longest_dd = max(ddt);
+
+
+save("Golf_PS3_output.mat",'shrink','alpharev','alpharec','alphaval','alphamom','alphablend',...
+    'lambda','mu','t0','trade','back_weight','pnl','booksize','tradesize','sharpe','longest_dd','deepest_dd')
