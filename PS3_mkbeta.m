@@ -1,30 +1,27 @@
+%equally-weighted market portfolio
+ew_mkt=mean(retMat,2,'omitnan');
 
-% ewmktportfolio
-ewmarket_portfolio = mean(retMat, 2, 'omitnan');
+dt = datetime(myday,'InputFormat','dd-MMM-yyyy');
+mon = month(dt);
+firDay = lagmatrix(mon,1);
+firstday = mon - firDay;
+firInd = find(firstday ~= 0);
 
-
-% part 2 risk model 
-y = datetime(myday,'InputFormat','dd-MMM-yyyy');
-mon = month(y);
-lagmon = lagmatrix(mon,1);
-firstday = mon - lagmon;
-index = find(firstday == 1 | firstday == -11 | isnan(firstday));
-yrInterval = 12;
-
-totalret = [zeros(1,n);retMat];
+yr = 12;
 mktbeta = [];
-for i = 13:length(index)
+for i = 13:length(firInd)
     % find out the active stock based on the first day of the current month
-    past_1y = totalret(index(i - yrInterval):index(i),:);
-    past_1y(isnan(past_1y)) = 0;
+    pastyr = retMat(firInd(i - yr):firInd(i),:);
+    pastyr(isnan(pastyr)) = 0;
     
-    row = size(past_1y, 1);
-    col = size(past_1y, 2);
+    row = size(pastyr, 1);
+    col = size(pastyr, 2);
     
-    x = [ones(row,1) ewmarket_portfolio(index(i - yrInterval):index(i),:)];
-    beta = inv(transpose(x) * x) * transpose(x) * past_1y;
+    x = [ones(row,1) ew_mkt(firInd(i - yr):firInd(i),:)];
+    beta = inv(transpose(x) * x) * transpose(x) * pastyr;
     mktbeta = [mktbeta;beta(2,:)];
 end
+
 
 
 
